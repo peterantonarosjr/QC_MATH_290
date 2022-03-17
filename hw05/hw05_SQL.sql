@@ -116,8 +116,34 @@ from tripsPerDate
 order by hours;
 
 
+/*EXERCISE 4*/
+/*Part 1 Attempt 1*/
+DROP VIEW IF EXISTS daily_tip_percentage_by_distance;
 
-
+create or replace
+view daily_tip_percentage_by_distance
+as
+select extract (day from tpep_dropoff_datetime) as dateTime,
+	(avg(tip_amount / total_amount)* 100) as tipPercentage,
+	case
+		when trip_distance >= 0
+		and trip_distance < 1 then '0-1 mile'
+		when trip_distance >= 1
+		and trip_distance < 2 then '1-2 mile'
+		when trip_distance >= 2
+		and trip_distance < 3 then '2-3 mile'
+		when trip_distance >= 3
+		and trip_distance < 4 then '3-4 mile'
+		when trip_distance >= 4
+		and trip_distance < 5 then '4-5 mile'
+		when trip_distance >= 5 then '5+ mile'
+	end as mileageCases
+from yellowtaxi_dataset
+where total_amount > 0
+group by extract (day from tpep_dropoff_datetime),mileageCases;
+select dateTime, mileageCases,tipPercentage
+from daily_tip_percentage_by_distance
+order by dateTime, mileageCases;
 
 
 
