@@ -103,3 +103,49 @@ select count(*) from title_ratings tr; /*1,226,998*/
 select count(distinct tconst) from title_ratings tr; /*1,226,998*/
 
 
+/*Altering tables to set a primary key*/
+alter table name_basics add primary key (nconst);
+alter table title_akas add primary key (titleId, ordering_);
+alter table title_basics add primary key (tconst);
+alter table title_crew add primary key (tconst);
+alter table title_episode add primary key (tconst);
+alter table title_principals add primary key (tconst, ordering_);
+alter table title_ratings add primary key (tconst);
+
+
+/*Testing for foreign key*/
+select count(*) from(
+	select tconst from title_ratings tr
+	except
+	select tconst from title_basics tb
+) as tconstCounter; /*Returns 4 -> present in title_r not in title_b*/
+
+select count(*) from(
+	select tconst from title_basics tb
+	except
+	select tconst from title_ratings tr
+) as tconstCounter; /*Returns 7,557,778 -> present in title_b not in title_r*/
+
+select * from(
+	select tconst from title_ratings tr
+	except
+	select tconst from title_basics tb
+) as tconstVals;
+
+select count(*) from(
+	select tconst from title_ratings tr
+	intersect
+	select tconst from title_basics tb
+) as tconstIntersec; /*Returns 1,226,994*/
+
+
+/*Attempting to add a foreign key*/
+alter table title_ratings add constraint
+	fk_title_basics_tconst foreign key (tconst)
+	references title_basics (tconst); /*title_basics parent*/
+
+alter table title_basics add constraint
+	fk_title_ratings_tconst foreign key (tconst)
+	references title_ratings (tconst); /*title_ratings parent*/
+
+
